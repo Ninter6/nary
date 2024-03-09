@@ -26,10 +26,10 @@ public:
     mathpls::mat4 getInverseView() const;
 
     void PMM(); // process mouse movement
-    void Advance() {transform().translation -= transform().Forward() / 50.f;}
-    void Retreat() {transform().translation += transform().Forward() / 50.f;}
-    void GoLeft() {transform().translation -= transform().Right() / 50.f;}
-    void GoRight() {transform().translation += transform().Right() / 50.f;}
+    void Advance() {transform().translation -= transform().Forward() * naEventListener::DeltaTime();}
+    void Retreat() {transform().translation += transform().Forward() * naEventListener::DeltaTime();}
+    void GoLeft() {transform().translation -= transform().Right() * naEventListener::DeltaTime();}
+    void GoRight() {transform().translation += transform().Right() * naEventListener::DeltaTime();}
     
 private:
     mathpls::mat4 projectionMatrix{1.f};

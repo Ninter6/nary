@@ -149,12 +149,6 @@ Frustum CreateFrustumFromMatrix(const mathpls::mat4& mat, float x_left, float x_
     auto& plane_near    = f.planes[4];
     auto& plane_far     = f.planes[5];
 
-    // the following is in the vulkan space
-    // note that the Y axis is flipped in Vulkan
-    assert(x_left < x_right);
-    assert(y_top < y_bottom);
-    assert(z_near < z_far);
-
     // calculate the tiled frustum
     // [Fast Extraction of Viewing Frustum Planes from the WorldView - Projection
     // Matrix](http://gamedevs.org/uploads/fast-extraction-viewing-frustum-planes-from-world-view-projection-matrix.pdf)

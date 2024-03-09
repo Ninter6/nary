@@ -58,9 +58,9 @@ struct PointLight {
 };
 
 struct DirectionalLight {
+    mathpls::mat4 projView;
     mathpls::vec3 direction;
     mathpls::vec3 color;
-    mathpls::mat4 projView;
 };
 
 struct RenderCamera {

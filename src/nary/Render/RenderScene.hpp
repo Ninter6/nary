@@ -30,10 +30,14 @@ public:
     std::vector<std::vector<RenderEntity>> m_PointLightsVisableEntities; // 点光源可见的可见实体(套娃)，一一对应(如果是前向渲染对应就没啥用)
 
 private:
+    void clear();
+
     void pickUpEntities(const Scene& scene, const RenderResource& renderResource);
     void filterCameraVisable();
     void filterDirectionalLightVisable();
     void filterPointLightVisable();
+
+    void updateGlobalUbo(const RenderResource& resource);
 
 };
 

@@ -89,6 +89,7 @@ struct MeshCompnent : public Component {
 
 struct MaterialCompnent : public Component {
     MaterialCompnent(naGameObject* obj) : Component(obj) {}
+    MaterialCompnent(naGameObject* obj, UID material_id) : Component(obj), material_id(material_id) {}
 
     UID material_id;
 };

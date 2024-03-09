@@ -28,6 +28,8 @@ VkSampleCountFlagBits naFrameBuffer::MsaaSamples = VK_SAMPLE_COUNT_2_BIT;
 // mathpls::vec3 lightPos = {-0.785f, -4.f, 3.448f};
 // mathpls::vec3 lightDir = {-0.522f, -0.42f, -0.492f};
 
+naGameObject::id_t lightPrt;
+
 void FirstApp::run(){
 #ifndef NDEBUG
     st::Countdown timer(1);
@@ -40,6 +42,8 @@ void FirstApp::run(){
         naEventListener::Update(window);
         scene.getActiveCamera()->UpdateEvents(window);
         eventListener.UpdateEvents(window);
+
+        scene.getGameObject(lightPrt)->transform().rotation.y += M_PI_2 * naEventListener::DeltaTime();
 
         scene.Update();
         
@@ -98,8 +102,16 @@ void FirstApp::loadGameObjects(){
 //    flat_vase.transform.scale = {3.5f, 1.5f, 3.5f};
 //    flat_vase.color = {.45f, .3f, .1f};
 
+    auto floor_tex_id = resourceManager.loadImage("floor.jpg");
+    Material floor_material{};
+    floor_material.baseColorFactor.a = 0.f;
+    floor_material.base_color_texture = floor_tex_id;
+
+    auto floor_material_id = renderManager.getRenderResource()->addMaterial(floor_material);
+
     auto floor = naGameObject::createGameObject();
     floor.addComponent<MeshCompnent>(quad_id);
+    floor.addComponent<MaterialCompnent>(floor_material_id);
     floor.transform().translation = {0, 0, 2.5f};
     floor.transform().scale = {3.f, 1.f, 3.f};
     floor.transform().rotation.y = mathpls::pi<float>();
@@ -110,13 +122,15 @@ void FirstApp::loadGameObjects(){
     
     auto ball_mdl_id = resourceManager.loadModel("sphere.obj");
     auto smartface_id = resourceManager.loadImage("fair-smartface.jpg");
+    auto basket_ball_tex_id = resourceManager.loadImage("basket ball.jpg");
 
     Material material1{};
     material1.baseColorFactor = {.4f, .84f, .53f, 0.5f};
     material1.base_color_texture = smartface_id;
 
     Material material2{};
-    material2.baseColorFactor = {.45f, .3f, .1f, 1.f};
+    material2.baseColorFactor = {.45f, .3f, .1f, 0.f};
+    material2.base_color_texture = basket_ball_tex_id;
 
     auto material1_id = renderManager.getRenderResource()->addMaterial(material1);
     auto material2_id = renderManager.getRenderResource()->addMaterial(material2);
@@ -126,11 +140,10 @@ void FirstApp::loadGameObjects(){
     ball.transform().translation = {0, -1.f, 2.5f};
     ball.transform().scale = {.3f, .3f, .3f};
     ball.transform().rotation = {0, 3.14f, 0};
-    ball.addComponent<MaterialCompnent>();
-    ball.getComponent<MaterialCompnent>()->material_id = material1_id;
+    ball.addComponent<MaterialCompnent>()->material_id = material1_id;
     
     auto ball1 = naGameObject::createGameObject(ball);
-    ball.getComponent<MaterialCompnent>()->material_id = material2_id;
+    ball1.getComponent<MaterialCompnent>()->material_id = material2_id;
     ball1.transform().translation.x += 2;
     ball1.addComponent<RigidBodyComponent>()->velocity = {-.5f, 20, 0};
     
@@ -146,16 +159,18 @@ void FirstApp::loadGameObjects(){
         {1.f, .67, .47f},
         {1.f, .73f, .8f}
     };
+
+   lightPrt = scene.addGameObject(naGameObject::createGameObject(), ball_id);
     
     LOOP(6) {
         auto light = naGameObject::createPointLight(.1f, lightColors[i] * mathpls::random::rand01());
         light.transform().translation = {
-            cos(i * 1.0471f),
-            -1.f,
-            sin(i * 1.0471f) + 2.5f
+            2 * cos(i * 1.0471f),
+            0,
+            2 * sin(i * 1.0471f)
         };
         
-        scene.addGameObject(std::move(light), ball_id);
+        scene.addGameObject(std::move(light), lightPrt);
     }
 
     auto camera = std::make_unique<naCamera>();

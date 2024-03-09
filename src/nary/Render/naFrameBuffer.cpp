@@ -272,7 +272,8 @@ void naFrameBuffer::createFrameBufferGroups(std::span<const VkAttachmentDescript
                     break;
                     
                 case VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL:
-                    usage |= VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+                    // usage |= VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+                    usage |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
                     break;
                     
                 default:

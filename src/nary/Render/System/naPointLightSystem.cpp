@@ -47,15 +47,11 @@ void naPointLightSystem::createPipeline(VkRenderPass renderPass){
     pipeline = std::make_unique<naPipeline>(device, "point_light_vertex.vert", "point_light_fragment.frag", pipelineConfig);
 }
 
-//     static const mathpls::mat4 rotate = 
-//         mathpls::translate(mathpls::vec3{0, 0, 2.5f}, 
-//             mathpls::rotate(mathpls::vec3{0, 1.f, 0}, 0.01, 
-//                 mathpls::translate(mathpls::vec3{0, 0, -2.5})));
-
 void naPointLightSystem::render(const RenderScene& scene, VkCommandBuffer commandBuffer) {
     auto num_lights = static_cast<uint32_t>(scene.m_PointLights.size());
     if (num_lights == 0)
         return;
+    if (num_lights != 6) DEBUG_LOG("now render lights: {}", num_lights);
 
     pipeline->bind(commandBuffer);
     

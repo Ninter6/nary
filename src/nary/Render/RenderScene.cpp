@@ -8,38 +8,23 @@
 
 namespace nary {
 
-void RenderScene::Update(const Scene& scene, const RenderResource& resource) {
+void RenderScene::clear() {
     m_DirectionalLight.reset();
     m_PointLights.clear();
     m_VisableEntities.clear();
     m_DirectionalLightVisableEntities.clear();
     m_PointLightsVisableEntities.clear();
+}
+
+void RenderScene::Update(const Scene& scene, const RenderResource& resource) {
+    clear();
 
     pickUpEntities(scene, resource);
     filterDirectionalLightVisable();
     filterCameraVisable();
     filterPointLightVisable();
 
-    // update global ubo
-    GlobalUbo ubo;
-    ubo.view = m_Camera.viewMat;
-    ubo.inverseView = m_Camera.invViewMat;
-    ubo.projection = m_Camera.projMat;
-    if (m_DirectionalLight.has_value())
-        ubo.directionalLightSpace = m_DirectionalLight->projView;
-    ubo.numLights = m_PointLights.size();
-    assert(ubo.numLights <= MAX_NUM_POINT_LIGHTS && "Point lights exceed maximum specified!");
-    std::copy(m_PointLights.begin(), m_PointLights.end(), std::begin(ubo.pointLights));
-    mathpls::vec3 cameraPos = m_Camera.invViewMat[3];
-    std::sort(std::begin(ubo.pointLights), std::end(ubo.pointLights), [&](auto&& a, auto&& b){
-        return mathpls::distance(a.position, cameraPos) > mathpls::distance(b.position, cameraPos);
-    });
-    resource.updateGlobalUbo(ubo);
-
-    // sort to group by material
-    std::sort(m_VisableEntities.begin(), m_VisableEntities.end(), [](auto&&a, auto&&b) {
-        return a.material < b.material;
-    });
+    updateGlobalUbo(resource);
 }
 
 void RenderScene::pickUpEntities(const Scene& scene, const RenderResource& resource) {
@@ -87,6 +72,11 @@ void RenderScene::filterCameraVisable() {
     std::erase_if(m_PointLights, [&](auto&&i) {
         return !m_Camera.viewFrustum.isOverlapping(pxpls::Sphere{i.position, i.radius});
     });
+
+    // sort to group by material
+    std::sort(m_VisableEntities.begin(), m_VisableEntities.end(), [](auto&&a, auto&&b) {
+        return a.material < b.material;
+    });
 }
 
 void RenderScene::filterDirectionalLightVisable() {
@@ -109,6 +99,23 @@ void RenderScene::filterPointLightVisable() {
             return !pxpls::IntersectSphereSphere(e.boundingSphere, lightSphere);
         });
     }
+}
+
+void RenderScene::updateGlobalUbo(const RenderResource& resource) {
+    GlobalUbo ubo;
+    ubo.view = m_Camera.viewMat;
+    ubo.inverseView = m_Camera.invViewMat;
+    ubo.projection = m_Camera.projMat;
+    if (m_DirectionalLight.has_value())
+        ubo.directionalLightSpace = m_DirectionalLight->projView;
+    ubo.numLights = m_PointLights.size();
+    assert(ubo.numLights <= MAX_NUM_POINT_LIGHTS && "Point lights exceed maximum specified!");
+    std::copy(m_PointLights.begin(), m_PointLights.end(), std::begin(ubo.pointLights));
+    mathpls::vec3 cameraPos = m_Camera.invViewMat[3];
+    std::sort(ubo.pointLights, ubo.pointLights + ubo.numLights, [&](auto&& a, auto&& b){
+        return mathpls::distance_quared(a.position, cameraPos) > mathpls::distance_quared(b.position, cameraPos);
+    });
+    resource.updateGlobalUbo(ubo);
 }
 
 }

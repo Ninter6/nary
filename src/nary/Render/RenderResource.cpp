@@ -58,7 +58,7 @@ void RenderResource::createDefaulrTexture() {
     info.format = VK_FORMAT_R8G8B8A8_UNORM;
     info.width = 1;
     info.height = 1;
-    uint8_t data[4]{255, 255, 255, 255};
+    uint8_t data[4]{0, 0, 0, 0}; // default to a transparent all black image
     m_Textures[0] = std::make_unique<naImage>(naImage::createWithImageData(*p_Device, data, info));
 }
 
