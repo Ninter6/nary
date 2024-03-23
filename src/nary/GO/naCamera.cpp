@@ -59,7 +59,7 @@ mathpls::mat4 naCamera::getInverseView() const {
 void naCamera::PMM() {
     auto mpd = GetMousePosDelta() / 333.333;
     transform().rotation.y += mpd.x;
-    transform().rotation.x -= abs(transform().rotation.x - mpd.y) > 1.5707 ? 0 : mpd.y;
+    transform().rotation.x += abs(transform().rotation.x - mpd.y) > 1.5707 ? 0 : mpd.y;
 }
 
 }

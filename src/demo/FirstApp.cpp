@@ -43,7 +43,7 @@ void FirstApp::run(){
         scene.getActiveCamera()->UpdateEvents(window);
         eventListener.UpdateEvents(window);
 
-        scene.getGameObject(lightPrt)->transform().rotation.y += M_PI_2 * naEventListener::DeltaTime();
+        scene.getGameObject(lightPrt)->transform().rotation.y += M_PI_4 * naEventListener::DeltaTime();
 
         scene.Update();
         
@@ -161,24 +161,29 @@ void FirstApp::loadGameObjects(){
     };
 
    lightPrt = scene.addGameObject(naGameObject::createGameObject(), ball_id);
+   scene.getGameObject(lightPrt)->transform().scale /= scene.getGameObject(ball_id)->transform().scale;
     
     LOOP(6) {
         auto light = naGameObject::createPointLight(.1f, lightColors[i] * mathpls::random::rand01());
         light.transform().translation = {
-            2 * cos(i * 1.0471f),
+            cos(i * 1.0471f),
             0,
-            2 * sin(i * 1.0471f)
+            sin(i * 1.0471f)
         };
         
         scene.addGameObject(std::move(light), lightPrt);
     }
+
+    auto Dlight = naGameObject::createGameObject();
+    Dlight.addComponent<DirectionalLightCompnent>()->direction = {-0.522f, -0.42f, -0.492f};
+    scene.addGameObject(std::move(Dlight));
 
     auto camera = std::make_unique<naCamera>();
     auto aspect = window.extentAspectRatio();
     camera->setPerspectiveProjection(mathpls::radians(60.f), aspect, .1f, 100.f);
     camera->transform().translation = {0, .3f, -2.5f};
     camera->transform().rotation.y = mathpls::pi<float>();
-    camera->transform().rotation.x = mathpls::pi<float>() / 5;
+    camera->transform().rotation.x = mathpls::pi<float>() / -5;
     
     scene.SetActiveCamera(std::move(camera));
 }

@@ -62,7 +62,7 @@ void RenderManager::tick(const Scene& scene) {
 
 
         m_Renderer->beginSwapChainRenderPass();
-        m_PostProcessing->render(m_OffScreenSets[frame_index], commandBuffer, 6, 14);
+        m_PostProcessing->render(m_OffScreenSets[frame_index], commandBuffer, 6, 1);
         
         DrawUI(commandBuffer);
         

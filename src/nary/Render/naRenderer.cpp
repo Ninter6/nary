@@ -67,7 +67,7 @@ void naRenderer::createFrameBuffer() {
         .setImageCount(naSwapChain::MAX_FRAMES_IN_FLIGHT)
         .setImageExtent(swapChain->getSwapChainExtent())
         .addColorResources(1, true, swapChain->getSwapChainImageFormat())
-        .addColorResources(1, true, VK_FORMAT_R8_SNORM)
+        .addColorResources(1, true, VK_FORMAT_R8_UNORM)
         .addDepthResources(2, true, swapChain->findDepthFormat())
         .finishResourceAddition()
         .addSubpass({}, {1}, 1)

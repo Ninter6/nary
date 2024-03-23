@@ -12,7 +12,7 @@ void RenderScene::clear() {
     m_DirectionalLight.reset();
     m_PointLights.clear();
     m_VisableEntities.clear();
-    m_DirectionalLightVisableEntities.clear();
+    m_Entities.clear();
     m_PointLightsVisableEntities.clear();
 }
 
@@ -20,9 +20,9 @@ void RenderScene::Update(const Scene& scene, const RenderResource& resource) {
     clear();
 
     pickUpEntities(scene, resource);
-    filterDirectionalLightVisable();
     filterCameraVisable();
     filterPointLightVisable();
+    processDirectionalLight();
 
     updateGlobalUbo(resource);
 }
@@ -41,7 +41,7 @@ void RenderScene::pickUpEntities(const Scene& scene, const RenderResource& resou
         const auto& modelMat = scene.absoluteModelMat(id);
         auto model = obj.getComponent<MeshCompnent>();
         if (model) {
-            auto& entity = m_VisableEntities.emplace_back();
+            auto& entity = m_Entities.emplace_back();
             entity.model = resource.getMesh(model->mesh_id);
             auto material = obj.getComponent<MaterialCompnent>();
             if (material) entity.material = material->material_id;
@@ -60,14 +60,13 @@ void RenderScene::pickUpEntities(const Scene& scene, const RenderResource& resou
             m_DirectionalLight.emplace();
             m_DirectionalLight->direction = directionalLight->direction;
             m_DirectionalLight->color = directionalLight->color;
-            m_DirectionalLight->projView = DirectionalLightProjView(*this);
         }
     }
 }
 
 void RenderScene::filterCameraVisable() {
-    std::erase_if(m_VisableEntities, [&](auto&&i) {
-        return !m_Camera.viewFrustum.isOverlapping(i.boundingSphere);
+    std::copy_if(m_Entities.begin(), m_Entities.end(), std::back_inserter(m_VisableEntities), [&](auto&&i) {
+        return m_Camera.viewFrustum.isOverlapping(i.boundingSphere);
     });
     std::erase_if(m_PointLights, [&](auto&&i) {
         return !m_Camera.viewFrustum.isOverlapping(pxpls::Sphere{i.position, i.radius});
@@ -79,15 +78,10 @@ void RenderScene::filterCameraVisable() {
     });
 }
 
-void RenderScene::filterDirectionalLightVisable() {
+void RenderScene::processDirectionalLight() {
     if (!m_DirectionalLight.has_value()) return;
 
-    m_DirectionalLightVisableEntities.clear();
-
-    Frustum frustum = CreateFrustumFromMatrix(m_DirectionalLight->projView);
-    for (const RenderEntity& entity : m_VisableEntities)
-        if (frustum.isOverlapping(entity.boundingSphere))
-            m_DirectionalLightVisableEntities.push_back(entity);
+    m_DirectionalLight->projView = DirectionalLightProjView(*this);
 }
 
 void RenderScene::filterPointLightVisable() {

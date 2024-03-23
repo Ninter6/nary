@@ -68,7 +68,7 @@ void naShadowSystem::renderGameObjects(const RenderScene& scene, VkCommandBuffer
                             &global_ubo,
                             0, nullptr);
     
-    for (auto& entity : scene.m_DirectionalLightVisableEntities) {
+    for (auto& entity : scene.m_Entities) {
         ShadowPushConstantData push{};
         push.modelMatrix = entity.modelMat;
         

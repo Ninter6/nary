@@ -64,7 +64,7 @@ struct TransformComponent : public Component {
         mathpls::vec3 Forward{};
         auto Pitch = rotation.x, Yaw = rotation.y;
         Forward.x = std::cos(Pitch) * std::sin(Yaw);
-        Forward.y = std::sin(Pitch);
+        Forward.y =-std::sin(Pitch);
         Forward.z = std::cos(Pitch) * std::cos(Yaw);
         return Forward;
     }
