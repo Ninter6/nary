@@ -49,7 +49,7 @@ private:
 
     void DrawUI(VkCommandBuffer cmdbuf);
 
-    friend ResourceManager;
+    friend AssetManager;
 };
 
 }

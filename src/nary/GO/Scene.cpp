@@ -52,8 +52,10 @@ void Scene::Update() {
             else // root 的子节点直接赋值
                 node->absoluteModelMat = node->gameObject->transform().mat4();
         }
-        for (auto& i : node->childern)
+        for (auto& i : node->childern) {
+            i->gameObject->isParentActive = !node->gameObject || node->gameObject->getActive();
             que.push(i.get());
+        }
         que.pop();
     }
 }

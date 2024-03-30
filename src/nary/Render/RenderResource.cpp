@@ -64,7 +64,7 @@ void RenderResource::createDefaulrTexture() {
 
 void RenderResource::createMaterialUniformBuffers(UID id) {
     auto& buffer = m_MaterialUniformBuffers[id];
-    buffer = std::make_unique<naBuffer>(*p_Device, 4*sizeof(float), 1, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
+    buffer = std::make_unique<naBuffer>(*p_Device, 6*sizeof(float), 1, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
 }
 
 naDevice* RenderResource::getDevice() const {
@@ -84,6 +84,10 @@ UID RenderResource::addMesh(std::unique_ptr<naModel>&& m) {
 
 UID RenderResource::addTexture(std::unique_ptr<naImage>&& t) {
     return m_Textures.insert(std::move(t));
+}
+
+UidMap<Material>& RenderResource::getMaterials() {
+    return m_Materials;
 }
 
 Material* RenderResource::getMaterial(UID id) const {

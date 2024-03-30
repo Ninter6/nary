@@ -38,12 +38,13 @@ void RenderScene::pickUpEntities(const Scene& scene, const RenderResource& resou
 
     // entities
     for (auto& [id, obj] : scene.getGameObjects()) {
+        if (!obj.getActive()) continue;
         const auto& modelMat = scene.absoluteModelMat(id);
-        auto model = obj.getComponent<MeshCompnent>();
+        auto model = obj.getComponent<MeshComponent>();
         if (model) {
             auto& entity = m_Entities.emplace_back();
             entity.model = resource.getMesh(model->mesh_id);
-            auto material = obj.getComponent<MaterialCompnent>();
+            auto material = obj.getComponent<MaterialComponent>();
             if (material) entity.material = material->material_id;
             entity.modelMat = modelMat;
             entity.boundingSphere = BoundingSphereTransform(entity.model->getBoundingSphere(), modelMat);
@@ -100,15 +101,18 @@ void RenderScene::updateGlobalUbo(const RenderResource& resource) {
     ubo.view = m_Camera.viewMat;
     ubo.inverseView = m_Camera.invViewMat;
     ubo.projection = m_Camera.projMat;
-    if (m_DirectionalLight.has_value())
-        ubo.directionalLightSpace = m_DirectionalLight->projView;
+    if (m_DirectionalLight.has_value()) {
+        ubo.directionalLight.projView = m_DirectionalLight->projView;
+        ubo.directionalLight.color = m_DirectionalLight->color;
+        ubo.directionalLight.direction = m_DirectionalLight->direction;
+    }
     ubo.numLights = m_PointLights.size();
     assert(ubo.numLights <= MAX_NUM_POINT_LIGHTS && "Point lights exceed maximum specified!");
-    std::copy(m_PointLights.begin(), m_PointLights.end(), std::begin(ubo.pointLights));
     mathpls::vec3 cameraPos = m_Camera.invViewMat[3];
-    std::sort(ubo.pointLights, ubo.pointLights + ubo.numLights, [&](auto&& a, auto&& b){
+    std::sort(m_PointLights.begin(), m_PointLights.end(), [&](auto&& a, auto&& b){
         return mathpls::distance_quared(a.position, cameraPos) > mathpls::distance_quared(b.position, cameraPos);
     });
+    std::copy(m_PointLights.begin(), m_PointLights.end(), std::begin(ubo.pointLights));
     resource.updateGlobalUbo(ubo);
 }
 

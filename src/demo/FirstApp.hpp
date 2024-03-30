@@ -42,11 +42,11 @@ private:
     void initEvents();
     
     void UpdatePhysics();
-    void DrawUI(VkCommandBuffer cmdbuf, uint32_t frameIndex);
+    void DrawUI();
     
     naWin window{WIDTH, HEIGHT, "Hello Vulkan!"};
     RenderManager renderManager{window};
-    ResourceManager resourceManager{renderManager};
+    AssetManager assetManager{renderManager};
     // naUISystem UI{device, renderer.getSwapChainRenderPass(), window};
     naEventListener eventListener;
     

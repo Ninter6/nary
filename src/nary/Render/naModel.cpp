@@ -155,17 +155,11 @@ void naModel::createIndexBuffers(const std::vector<uint32_t>& indices) {
 
 void naModel::createBoundingSphere(const std::vector<Vertex>& vertices) {
     auto& sphere = meshBoundingSphere;
+    sphere.center = vertices[0].position;
     pxpls::Point sp[4];
-    int ns = 0;
-    for (auto& i : vertices) {
-        if (!pxpls::IsPointOutSphere(i.position, meshBoundingSphere)) continue;
 
-        sp[ns++] = i.position;
+    auto make_sph = [&](int ns) {
         switch (ns) {
-        case 1: {
-            sphere.center = sp[0];
-            break;
-        }
         case 2: {
             sphere.center = (sp[0] + sp[1]) / 2;
 		    sphere.radius = mathpls::distance(sp[0], sp[1]) / 2;
@@ -194,10 +188,30 @@ void naModel::createBoundingSphere(const std::vector<Vertex>& vertices) {
 		        sphere.center.z = (sp[0].z + ((v2.x*v3.y - v3.x*v2.y)*L1 - (v1.x*v3.y - v3.x*v1.y)*L2 + (v1.x*v2.y - v2.x*v1.y)*L3) / V);
 		        sphere.radius = (sphere.center - sp[0]).length();
             }
-            ns--; // pop last support point
+            break;
         }
         default:
             break;
+        }
+    };
+
+    for (uint32_t i = 1; i < vertices.size(); i++) {
+        if (!pxpls::IsPointOutSphere(vertices[i].position, meshBoundingSphere)) continue;
+        sp[0] = vertices[i].position;
+        for (uint32_t j = 0; j < i; j++) {
+            if (!pxpls::IsPointOutSphere(vertices[j].position, meshBoundingSphere)) continue;
+            sp[1] = vertices[j].position;
+            make_sph(2);
+            for (uint32_t k = 0; k < j; k++) {
+                if (!pxpls::IsPointOutSphere(vertices[k].position, meshBoundingSphere)) continue;
+                sp[2] = vertices[k].position;
+                make_sph(3);
+                for (uint32_t l = 0; l < k; l++) {
+                    if (!pxpls::IsPointOutSphere(vertices[l].position, meshBoundingSphere)) continue;
+                    sp[3] = vertices[l].position;
+                    make_sph(4);
+                }
+            }
         }
     }
 

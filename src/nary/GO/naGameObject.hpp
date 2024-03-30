@@ -38,9 +38,11 @@ public:
     naGameObject& operator=(naGameObject&&);
     
     id_t getId() const {return id;}
+
+    bool getActive() const {return isActive && isParentActive;}
+    void setActive(bool active) {isActive = active;}
     
     Scene* scene;
-    
     std::vector<ComponentWapper> components;
     
     TransformComponent& transform() const;
@@ -69,10 +71,13 @@ private:
     naGameObject& operator=(const naGameObject&);
     
     id_t id;
+    bool isActive = true, isParentActive = true;
     
     void applyComponent();
     
     static inline id_t currentId = 0;
+
+    friend class Scene;
 };
 
 }

@@ -18,12 +18,19 @@ struct PointLight {
     vec4 color;
 };
 
+struct DriectionalLight {
+    mat4 projView;
+    vec4 color;
+    vec3 direction;
+    float _padding;
+};
+
 layout(set = 0, binding = 0) uniform GlobalUbo {
     mat4 projection;
     mat4 view;
     mat4 inverseView;
-    mat4 lightSpace;
     vec4 ambientLightColor;
+    DriectionalLight directionalLight;
     PointLight pointLights[10];
     int numLights;
 } ubo;
@@ -36,5 +43,5 @@ void main() {
     vec4 positionInCameraSpace = lightInCameraSpace + LIGHT_RADIUS * vec4(fragOffset, 0, 0);
     gl_Position = ubo.projection * positionInCameraSpace;
     
-    fragColor = ubo.pointLights[gl_InstanceIndex].color.rgb * pow(ubo.pointLights[gl_InstanceIndex].color.g, 1 / 3);
+    fragColor = ubo.pointLights[gl_InstanceIndex].color.rgb * 0.05;
 }

@@ -2,8 +2,7 @@
 
 namespace nary {
 
-mathpls::vec3 lightPos = {-0.785f, -4.f, 3.448f};
-mathpls::vec3 lightDir = {-0.522f, -0.42f, -0.492f};
+UID ui_texture;
 
 RenderManager::RenderManager(naWin& window) : m_Window(window) {
     initialize();
@@ -29,6 +28,7 @@ void RenderManager::initialize() {
     m_PostProcessing->setShaders("rectangle.vert", "FXAA.frag");
 
     m_UI = std::make_unique<naUISystem>(*m_Device, m_Renderer->getSwapChainRenderPass(), m_Window);
+    m_UI->beginFrame();
 }
 
 void RenderManager::createDescriptorSets() {
@@ -72,17 +72,36 @@ void RenderManager::tick(const Scene& scene) {
 }
 
 void RenderManager::DrawUI(VkCommandBuffer cmdbuf) {
-    m_UI->beginFrame(); {
+    static char text[21*14]{};
+    static mathpls::vec4 a{3.f, 2.f, 2.95f, 2.03f};
+    constexpr float G = 514;
+
+    {
         ImGui::Begin("Hello world window");
 
-//        ImGui::Text("人生得意须尽欢，\n今后都得拉清单。");
-//        ImGui::Image(&UItexDescriptorSet, ImVec2{300, 300});
-        
-        ImGui::DragFloat3("Light Position", &lightPos[0], .1f);
-        ImGui::DragFloat3("Light Direction", &lightDir[0], .1f);
+        mathpls::vec2 buf = {a[0], a[1]};
+        auto dt = 1/60.f;
+        auto d = mathpls::vec2{10, 7} - buf;
+        auto k = G/d.length_squared()*dt*dt;
+        d.normalize();
+        a[0] += a[0] - a[2] + d.x * k;
+        a[1] += a[1] - a[3] + d.y * k;
+        a[2] = buf[0];
+        a[3] = buf[1];
+
+        memset(text, '-', sizeof(text));
+        mathpls::uivec2 pa(std::round(a[0]), std::round(a[1]));
+        if (pa.x >= 0 && pa.x < 20 && pa.y >= 0 && pa.y < 14)
+            text[pa.x + pa.y * 21] = '*';
+        LOOP(14) text[20 + i*21] = '\n';
+
+        ImGui::Text("%s", text);
 
         ImGui::End();
-    } m_UI->endFrame(cmdbuf);
+    }
+    
+    m_UI->endFrame(cmdbuf);
+    m_UI->beginFrame(); // so that it can be used externally
 }
 
 RenderResource* RenderManager::getRenderResource() const {

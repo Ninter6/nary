@@ -20,8 +20,8 @@ struct Material {
     static constexpr size_t ubo_offset = 11 * sizeof(float);
 
     mathpls::vec4 baseColorFactor{};
-    float metallicFactor    = 0.0f;
-    float roughnessFactor   = 0.0f;
+    float metallicFactor    = 0.2f;
+    float roughnessFactor   = 0.8f;
     float normalScale       = 0.0f;
     float occlusionStrength = 0.0f;
     mathpls::vec3 emissiveFactor{};
@@ -59,8 +59,8 @@ struct PointLight {
 
 struct DirectionalLight {
     mathpls::mat4 projView;
-    mathpls::vec3 direction;
-    mathpls::vec3 color;
+    mathpls::vec4 color;
+    alignas(16) mathpls::vec3 direction;
 };
 
 struct RenderCamera {
@@ -76,10 +76,10 @@ struct GlobalUbo {
     mathpls::mat4 projection{1.f};
     mathpls::mat4 view{1.f};
     mathpls::mat4 inverseView{1.f};
-    mathpls::mat4 directionalLightSpace{1.f};
     mathpls::vec4 ambientLightColor{1.f, 1.f, 1.f, .02f};
+    DirectionalLight directionalLight;
     PointLight pointLights[MAX_NUM_POINT_LIGHTS];
-    int numLights;
+    int numLights = 0;
 };
 
 enum class RenderEntityType {
@@ -112,6 +112,7 @@ public:
     UID addMesh(std::unique_ptr<naModel>&& m);
     UID addTexture(std::unique_ptr<naImage>&& t);
 
+    UidMap<Material>& getMaterials();
     Material* getMaterial(UID id) const;
     naModel* getMesh(UID id) const;
     naImage* getTexture(UID id) const;

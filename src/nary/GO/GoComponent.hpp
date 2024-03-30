@@ -80,16 +80,16 @@ struct TransformComponent : public Component {
     mathpls::mat4 mat4() const;
 };
 
-struct MeshCompnent : public Component {
-    MeshCompnent(naGameObject* obj) : Component(obj) {}
-    MeshCompnent(naGameObject* obj, UID mesh_id) : Component(obj), mesh_id(mesh_id) {}
+struct MeshComponent : public Component {
+    MeshComponent(naGameObject* obj) : Component(obj) {}
+    MeshComponent(naGameObject* obj, UID mesh_id) : Component(obj), mesh_id(mesh_id) {}
 
     UID mesh_id;
 };
 
-struct MaterialCompnent : public Component {
-    MaterialCompnent(naGameObject* obj) : Component(obj) {}
-    MaterialCompnent(naGameObject* obj, UID material_id) : Component(obj), material_id(material_id) {}
+struct MaterialComponent : public Component {
+    MaterialComponent(naGameObject* obj) : Component(obj) {}
+    MaterialComponent(naGameObject* obj, UID material_id) : Component(obj), material_id(material_id) {}
 
     UID material_id;
 };

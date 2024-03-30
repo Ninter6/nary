@@ -47,9 +47,9 @@ private:
     std::unordered_map<UID, T> m_Map;
 };
 
-class ResourceManager {
+class AssetManager {
 public:
-    ResourceManager(RenderManager& renderManager);
+    AssetManager(RenderManager& renderManager);
 
     UID loadModel(const std::string& filename) const;
     UID loadImage(const std::string& filename) const;

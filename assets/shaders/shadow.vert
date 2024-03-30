@@ -11,12 +11,19 @@ struct PointLight {
     vec4 color;
 };
 
+struct DriectionalLight {
+    mat4 projView;
+    vec4 color;
+    vec3 direction;
+    float _padding;
+};
+
 layout(set = 0, binding = 0) uniform GlobalUbo {
     mat4 projection;
     mat4 view;
     mat4 inverseView;
-    mat4 lightSpace;
     vec4 ambientLightColor;
+    DriectionalLight directionalLight;
     PointLight pointLights[10];
     int numLights;
 } ubo;
@@ -26,5 +33,5 @@ layout(push_constant) uniform Push {
 } push;
 
 void main(){
-    gl_Position = ubo.lightSpace * push.modelMatrix * vec4(position, 1);
+    gl_Position = ubo.directionalLight.projView * push.modelMatrix * vec4(position, 1);
 }
