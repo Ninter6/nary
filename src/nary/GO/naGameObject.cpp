@@ -82,7 +82,7 @@ mathpls::mat4 TransformComponent::mat4() const {
 naGameObject naGameObject::createPointLight(float radius, mathpls::vec3 color) {
     naGameObject obj = createGameObject();
     obj.transform().scale.x = radius;
-    obj.addComponent<PointLightCompnent>(color);
+    obj.addComponent<PointLightComponent>(color);
     return obj;
 }
 

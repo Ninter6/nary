@@ -23,6 +23,7 @@ public:
 
     void tick(const Scene& scene);
 
+    naWin* getWindow() const;
     RenderResource* getRenderResource() const;
     
 private:

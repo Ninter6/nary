@@ -133,7 +133,7 @@ vec3 calcuPointLight(PointLight light, vec3 albedo, float metallic, float roughn
 }
 
 vec3 calcuDirectionalLight(vec3 albedo, float metallic, float roughness, vec3 N, vec3 V) {
-    vec3 L = normalize(ubo.directionalLight.direction);
+    vec3 L = ubo.directionalLight.direction;
     vec3 H = normalize(V + L);
 
     vec3 radiance = ubo.directionalLight.color.rgb;

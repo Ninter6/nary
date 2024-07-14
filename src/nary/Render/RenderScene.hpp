@@ -27,6 +27,7 @@ public:
 
     std::vector<RenderEntity> m_Entities;
     std::vector<RenderEntity> m_VisableEntities; // 会按照material排序, 使用时std::lower_bound/std::upper_bound分组
+    std::vector<RenderEntity> m_DirectionalLightVisableEntities;
     std::vector<std::vector<RenderEntity>> m_PointLightsVisableEntities; // 点光源可见的可见实体(套娃)，一一对应(如果是前向渲染对应就没啥用)
 
 private:

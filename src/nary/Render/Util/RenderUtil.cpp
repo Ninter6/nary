@@ -1,4 +1,4 @@
-#define MATHPLS_VULKAN
+#define MATHPLS_DEPTH_0_1
 #include "RenderUtil.hpp"
 #include "RenderScene.hpp"
 
@@ -57,13 +57,13 @@ pxpls::Bounds BoundsTransform(const pxpls::Bounds& bnd, const mathpls::mat4& mat
     return res;
 }
 
-mathpls::mat4 DirectionalLightProjView(const RenderScene& scene) {
+mathpls::mat4 DirectionalLightProjView(const std::vector<RenderEntity>& DlVisable, const mathpls::vec3& lightDir) {
     pxpls::Bounds scene_bounding_box;
     {
         scene_bounding_box.min = mathpls::vec3(FLT_MAX);
         scene_bounding_box.max = mathpls::vec3(-FLT_MAX);
 
-        for (const RenderEntity& entity : scene.m_Entities)
+        for (const RenderEntity& entity : DlVisable)
         {
             const auto& [cnt, r] = entity.boundingSphere;
             scene_bounding_box = MergeBoundsPoint(scene_bounding_box, {cnt.x + r, cnt.y, cnt.z});
@@ -78,17 +78,17 @@ mathpls::mat4 DirectionalLightProjView(const RenderScene& scene) {
     mathpls::mat4 light_view;
     mathpls::mat4 light_proj;
     {
-        mathpls::vec3 box_center((scene_bounding_box.max.x + scene_bounding_box.min.x) * 0.5,
-                             (scene_bounding_box.max.y + scene_bounding_box.min.y) * 0.5,
+        mathpls::vec3 box_center((scene_bounding_box.max.x + scene_bounding_box.min.x) * 0.5f,
+                             (scene_bounding_box.max.y + scene_bounding_box.min.y) * 0.5f,
                              (scene_bounding_box.max.z + scene_bounding_box.min.z));
-        mathpls::vec3 box_extents((scene_bounding_box.max.x - scene_bounding_box.min.x) * 0.5,
-                              (scene_bounding_box.max.y - scene_bounding_box.min.y) * 0.5,
-                              (scene_bounding_box.max.z - scene_bounding_box.min.z) * 0.5);
+        mathpls::vec3 box_extents((scene_bounding_box.max.x - scene_bounding_box.min.x) * 0.5f,
+                              (scene_bounding_box.max.y - scene_bounding_box.min.y) * 0.5f,
+                              (scene_bounding_box.max.z - scene_bounding_box.min.z) * 0.5f);
 
         mathpls::vec3 eye =
-            box_center + scene.m_DirectionalLight->direction * box_extents.length();
+            box_center + lightDir * box_extents.length();
         mathpls::vec3 center = box_center;
-        light_view       = mathpls::lookAt(eye, center, mathpls::vec3(0.0, 0.0, 1.0));
+        light_view       = mathpls::lookAt(eye, center, mathpls::vec3(0.0, 1.0, 0.0));
 
         pxpls::Bounds scene_bounding_box_light_view   = BoundsTransform(scene_bounding_box, light_view);
         light_proj = mathpls::ortho(

@@ -193,9 +193,9 @@ void naRenderer::beginSwapChainRenderPass() {
     
     VkViewport viewport{};
     viewport.x = 0.f;
-    viewport.y = 0.f;
+    viewport.y = static_cast<float>(swapChain->getSwapChainExtent().height);
     viewport.width = static_cast<float>(swapChain->getSwapChainExtent().width);
-    viewport.height = static_cast<float>(swapChain->getSwapChainExtent().height);
+    viewport.height =-static_cast<float>(swapChain->getSwapChainExtent().height);
     viewport.maxDepth = 1.f;
     viewport.minDepth = 0.f;
     VkRect2D scissor{{0, 0}, swapChain->getSwapChainExtent()};

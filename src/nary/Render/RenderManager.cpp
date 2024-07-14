@@ -72,36 +72,46 @@ void RenderManager::tick(const Scene& scene) {
 }
 
 void RenderManager::DrawUI(VkCommandBuffer cmdbuf) {
-    static char text[21*14]{};
-    static mathpls::vec4 a{3.f, 2.f, 2.95f, 2.03f};
-    constexpr float G = 514;
+//    static char text[21*14]{};
+//    static mathpls::vec4 a{3.f, 2.f, 2.95f, 2.03f};
+//    constexpr float G = 514;
+//
+//    {
+//        ImGui::Begin("Hello world window");
+//
+//        mathpls::vec2 buf = {a[0], a[1]};
+//        auto dt = 1/60.f;
+//        auto d = mathpls::vec2{10, 7} - buf;
+//        auto k = G/d.length_squared()*dt*dt;
+//        d.normalize();
+//        a[0] += a[0] - a[2] + d.x * k;
+//        a[1] += a[1] - a[3] + d.y * k;
+//        a[2] = buf[0];
+//        a[3] = buf[1];
+//
+//        memset(text, '-', sizeof(text));
+//        mathpls::uivec2 pa(std::round(a[0]), std::round(a[1]));
+//        if (pa.x >= 0 && pa.x < 20 && pa.y >= 0 && pa.y < 14)
+//            text[pa.x + pa.y * 21] = '*';
+//        LOOP(14) text[20 + i*21] = '\n';
+//
+//        ImGui::Text("%s", text);
+//
+//        ImGui::End();
+//    }
 
-    {
-        ImGui::Begin("Hello world window");
+    ImGui::Begin("Buffer");
 
-        mathpls::vec2 buf = {a[0], a[1]};
-        auto dt = 1/60.f;
-        auto d = mathpls::vec2{10, 7} - buf;
-        auto k = G/d.length_squared()*dt*dt;
-        d.normalize();
-        a[0] += a[0] - a[2] + d.x * k;
-        a[1] += a[1] - a[3] + d.y * k;
-        a[2] = buf[0];
-        a[3] = buf[1];
+    ImGui::Image(&m_ShadowMapSets[m_Renderer->getFrameIndex()], {320, 200});
 
-        memset(text, '-', sizeof(text));
-        mathpls::uivec2 pa(std::round(a[0]), std::round(a[1]));
-        if (pa.x >= 0 && pa.x < 20 && pa.y >= 0 && pa.y < 14)
-            text[pa.x + pa.y * 21] = '*';
-        LOOP(14) text[20 + i*21] = '\n';
-
-        ImGui::Text("%s", text);
-
-        ImGui::End();
-    }
+    ImGui::End();
     
     m_UI->endFrame(cmdbuf);
     m_UI->beginFrame(); // so that it can be used externally
+}
+
+naWin* RenderManager::getWindow() const {
+    return &m_Window;
 }
 
 RenderResource* RenderManager::getRenderResource() const {

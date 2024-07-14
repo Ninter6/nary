@@ -621,7 +621,7 @@ bool ImGui_CreateDescriptorSets()
 	LayoutBinding.binding = 0;
 	LayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 	LayoutBinding.descriptorCount = 1;
-	LayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+	LayoutBinding.stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS;
 //    LayoutBinding.pImmutableSamplers = &ImGui_ImplVulkan_Renderer_Info.Sampler;
 
 	VkDescriptorSetLayoutCreateInfo DescriptorSetLayoutCreateInfo;

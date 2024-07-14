@@ -17,6 +17,7 @@
 
 #include <filesystem>
 #include <unordered_map>
+#include <random>
 
 namespace std {
 template<>
@@ -154,68 +155,19 @@ void naModel::createIndexBuffers(const std::vector<uint32_t>& indices) {
 }
 
 void naModel::createBoundingSphere(const std::vector<Vertex>& vertices) {
-    auto& sphere = meshBoundingSphere;
-    sphere.center = vertices[0].position;
-    pxpls::Point sp[4];
+    std::vector<pxpls::Point> points(vertices.size());
+    std::transform(vertices.begin(), vertices.end(), points.begin(), [](auto&& v) {
+        return v.position;
+    });
+    std::mt19937 g{std::random_device{}()};
+    std::shuffle(points.begin(), points.end(), g);
 
-    auto make_sph = [&](int ns) {
-        switch (ns) {
-        case 2: {
-            sphere.center = (sp[0] + sp[1]) / 2;
-		    sphere.radius = mathpls::distance(sp[0], sp[1]) / 2;
-            break;
-        }
-        case 3: {
-            auto e0 = sp[1] - sp[0], e1 = sp[2] - sp[0];
-		    auto a = mathpls::dot(e0, e0), b = mathpls::dot(e0, e1), c = mathpls::dot(e1, e1);
-		    auto d = a * c - b * b;
-		    if (std::abs(d) > 1e-3f) {
-		        auto s = (a - b)*c / (2 * d), t = (c - b)*a / (2 * d);
-		        sphere.center = sp[0] + s * e0 + t * e1;
-		        sphere.radius = (sp[0] - sphere.center).length();
-            }
-            break;
-        }
-        case 4: {
-            auto v1 = sp[1] - sp[0], v2 = sp[2] - sp[0], v3 = sp[3] - sp[0];
-		    auto V = mathpls::dot(v1, mathpls::cross(v2, v3));
-		    // Check that the three points are not on the same plane.
-		    if (std::abs(V) > 1e-3f) {
-		        V *= 2.0;
-		        auto L1 = v1.length_squared(), L2 = v2.length_squared(), L3 = v3.length_squared();
-		        sphere.center.x = (sp[0].x + ((v2.y*v3.z - v3.y*v2.z)*L1 - (v1.y*v3.z - v3.y*v1.z)*L2 + (v1.y*v2.z - v2.y*v1.z)*L3) / V);
-		        sphere.center.y = (sp[0].y + (-(v2.x*v3.z - v3.x*v2.z)*L1 + (v1.x*v3.z - v3.x*v1.z)*L2 - (v1.x*v2.z - v2.x*v1.z)*L3) / V);
-		        sphere.center.z = (sp[0].z + ((v2.x*v3.y - v3.x*v2.y)*L1 - (v1.x*v3.y - v3.x*v1.y)*L2 + (v1.x*v2.y - v2.x*v1.y)*L3) / V);
-		        sphere.radius = (sphere.center - sp[0]).length();
-            }
-            break;
-        }
-        default:
-            break;
-        }
-    };
+    if (points.size() > 10e4)
+        meshBoundingSphere = pxpls::BoundingSphereFromPointsFast(points);
+    else
+        meshBoundingSphere = pxpls::BoundingSphereFromPoints(points); // this may cost much time
 
-    for (uint32_t i = 1; i < vertices.size(); i++) {
-        if (!pxpls::IsPointOutSphere(vertices[i].position, meshBoundingSphere)) continue;
-        sp[0] = vertices[i].position;
-        for (uint32_t j = 0; j < i; j++) {
-            if (!pxpls::IsPointOutSphere(vertices[j].position, meshBoundingSphere)) continue;
-            sp[1] = vertices[j].position;
-            make_sph(2);
-            for (uint32_t k = 0; k < j; k++) {
-                if (!pxpls::IsPointOutSphere(vertices[k].position, meshBoundingSphere)) continue;
-                sp[2] = vertices[k].position;
-                make_sph(3);
-                for (uint32_t l = 0; l < k; l++) {
-                    if (!pxpls::IsPointOutSphere(vertices[l].position, meshBoundingSphere)) continue;
-                    sp[3] = vertices[l].position;
-                    make_sph(4);
-                }
-            }
-        }
-    }
-
-    DEBUG_LOG("Bounding Sphere: {[{}, {}, {}], {}}", sphere.center.x, sphere.center.y, sphere.center.z, sphere.radius);
+    DEBUG_LOG("Bounding Sphere: {[{}, {}, {}], {}}", meshBoundingSphere.center.x, meshBoundingSphere.center.y, meshBoundingSphere.center.z, meshBoundingSphere.radius);
 }
 
 void naModel::draw(VkCommandBuffer commandBufffer){

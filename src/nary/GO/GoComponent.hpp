@@ -94,17 +94,17 @@ struct MaterialComponent : public Component {
     UID material_id;
 };
 
-struct PointLightCompnent : public Component {
-    PointLightCompnent(naGameObject* obj) : Component(obj) {}
-    PointLightCompnent(naGameObject* obj, mathpls::vec3 flux)
+struct PointLightComponent : public Component {
+    PointLightComponent(naGameObject* obj) : Component(obj) {}
+    PointLightComponent(naGameObject* obj, mathpls::vec3 flux)
     : Component(obj), flux(flux) {}
     
     mathpls::vec3 flux;
 };
 
-struct DirectionalLightCompnent : public Component {
-    DirectionalLightCompnent(naGameObject* obj) : Component(obj) {}
-    DirectionalLightCompnent(naGameObject* obj, mathpls::vec3 color, mathpls::vec3 direction)
+struct DirectionalLightComponent : public Component {
+    DirectionalLightComponent(naGameObject* obj) : Component(obj) {}
+    DirectionalLightComponent(naGameObject* obj, mathpls::vec3 color, mathpls::vec3 direction)
     : Component(obj), color(color), direction(direction) {}
     
     mathpls::vec3 color;
@@ -112,7 +112,7 @@ struct DirectionalLightCompnent : public Component {
 };
 
 struct RigidBodyComponent : public Component {
-    RigidBodyComponent(naGameObject* obj);
+    using Component::Component;
     
     float mass = 1;
     mathpls::vec3 velocity;

@@ -18,7 +18,4 @@ ComponentWapper& ComponentWapper::operator=(const ComponentWapper& o) {
     return *this;
 }
 
-RigidBodyComponent::RigidBodyComponent(naGameObject* obj)
-: Component(obj) {}
-
 }

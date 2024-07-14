@@ -41,9 +41,7 @@ void FirstApp::run(){
         scene.getGameObject(lightPrt)->transform().rotation.y += M_PI_4 * naEventListener::DeltaTime();
 
         scene.Update();
-        
-//        lightPos = camera.transform().translation;
-//        lightDir = camera.transform().Forward();
+
         renderManager.tick(scene);
         DrawUI();
         
@@ -68,7 +66,7 @@ void FirstApp::run(){
 void FirstApp::DrawUI() {
     ImGui::Begin("Info"); {
         
-        auto lightDir = scene.getGameObject(Dlight)->getComponent<DirectionalLightCompnent>()->direction.value_ptr();
+        auto lightDir = scene.getGameObject(Dlight)->getComponent<DirectionalLightComponent>()->direction.value_ptr();
         ImGui::DragFloat3("Light Direction", lightDir, .05f);
 
         if (ImGui::Button("Point Light"))
@@ -162,7 +160,7 @@ void FirstApp::loadGameObjects(){
     
     auto ball = naGameObject::createGameObject();
     ball.addComponent<MeshComponent>(ball_mdl_id);
-    ball.transform().translation = {0, -1.f, 2.5f};
+    ball.transform().translation = {0, 1.f, 2.5f};
     ball.transform().scale = {.3f, .3f, .3f};
     ball.transform().rotation = {0, 3.14f, 0};
     ball.addComponent<MaterialComponent>()->material_id = material1_id;
@@ -170,7 +168,7 @@ void FirstApp::loadGameObjects(){
     auto ball1 = naGameObject::createGameObject(ball);
     ball1.getComponent<MaterialComponent>()->material_id = material2_id;
     ball1.transform().translation.x += 2;
-    ball1.addComponent<RigidBodyComponent>()->velocity = {-.5f, 20, 0};
+    ball1.addComponent<RigidBodyComponent>()->velocity = {-.1f, 5, 0};
     
     auto ball_id = scene.addGameObject(std::move(ball));
     scene.addGameObject(std::move(ball1));
@@ -201,7 +199,7 @@ void FirstApp::loadGameObjects(){
     }
 
     auto Dlight = naGameObject::createGameObject();
-    auto dl = Dlight.addComponent<DirectionalLightCompnent>();
+    auto dl = Dlight.addComponent<DirectionalLightComponent>();
     dl->direction = {-0.522f, -0.42f, -0.492f};
     dl->color = {1.f, 1.f, 1.f};
     nary::Dlight = scene.addGameObject(std::move(Dlight));
@@ -209,13 +207,11 @@ void FirstApp::loadGameObjects(){
     auto camera = std::make_unique<naCamera>();
     auto aspect = window.extentAspectRatio();
     camera->setPerspectiveProjection(mathpls::radians(60.f), aspect, .1f, 100.f);
-    camera->transform().translation = {0, .3f, -2.5f};
+    camera->transform().translation = {0, -.3f, -2.5f};
     camera->transform().rotation.y = mathpls::pi<float>();
-    camera->transform().rotation.x = mathpls::pi<float>() / -5;
-    
-    scene.SetActiveCamera(std::move(camera));
+    camera->transform().rotation.x =-mathpls::pi<float>() / -5;
 
-    SceneLoader::load(scene, assetManager, *renderManager.getRenderResource(), "/Users/mac/Documents/CPPPRO/my-nary/assets/scene0.json");
+    scene.SetActiveCamera(std::move(camera));
 }
 
 void FirstApp::initEvents() {

@@ -1,4 +1,4 @@
-#define MATHPLS_VULKAN
+#define MATHPLS_DEPTH_0_1
 #include "RenderScene.hpp"
 #include "RenderUtil.hpp"
 
@@ -11,8 +11,9 @@ namespace nary {
 void RenderScene::clear() {
     m_DirectionalLight.reset();
     m_PointLights.clear();
-    m_VisableEntities.clear();
     m_Entities.clear();
+    m_VisableEntities.clear();
+    m_DirectionalLightVisableEntities.clear();
     m_PointLightsVisableEntities.clear();
 }
 
@@ -49,14 +50,14 @@ void RenderScene::pickUpEntities(const Scene& scene, const RenderResource& resou
             entity.modelMat = modelMat;
             entity.boundingSphere = BoundingSphereTransform(entity.model->getBoundingSphere(), modelMat);
         }
-        auto pointLight = obj.getComponent<PointLightCompnent>();
+        auto pointLight = obj.getComponent<PointLightComponent>();
         if (pointLight) {
             auto& m_pointLight = m_PointLights.emplace_back();
             m_pointLight.flux = pointLight->flux;
             m_pointLight.radius = m_pointLight.calculateRadius();
             m_pointLight.position = modelMat[3];
         }
-        auto directionalLight = obj.getComponent<DirectionalLightCompnent>();
+        auto directionalLight = obj.getComponent<DirectionalLightComponent>();
         if (directionalLight && !m_DirectionalLight.has_value()) {
             m_DirectionalLight.emplace();
             m_DirectionalLight->direction = directionalLight->direction;
@@ -80,9 +81,34 @@ void RenderScene::filterCameraVisable() {
 }
 
 void RenderScene::processDirectionalLight() {
-    if (!m_DirectionalLight.has_value()) return;
+    if (!m_DirectionalLight.has_value() || m_VisableEntities.empty())
+        return;
 
-    m_DirectionalLight->projView = DirectionalLightProjView(*this);
+    pxpls::Sphere fbs; // Frustum Bounding Sphere
+    {
+        mathpls::vec3 v[4] {{1, 1, 1}, {-1, -1, 1}, {1, -1, 0},{-1, 1, 0}};
+        auto M = mathpls::inverse(m_Camera.projMat * m_Camera.viewMat);
+
+        for (auto& i : v){
+            auto u = M * mathpls::vec4{i, 1.f};
+            i = u / u.w;
+        }
+
+        fbs = pxpls::BoundingSphereFromPoints(v);
+    }
+
+    auto& dir = m_DirectionalLight->direction.normalize() *= -1;
+
+    std::copy_if(m_Entities.begin(), m_Entities.end(), std::back_inserter(m_DirectionalLightVisableEntities), [&](auto&&i) {
+        if (pxpls::IntersectSphereSphere(i.boundingSphere, fbs))
+            return true;
+        auto D = fbs.center - i.boundingSphere.center;
+        auto R = fbs.radius + i.boundingSphere.radius;
+        auto P = mathpls::cross(D, dir).length_squared();
+        return mathpls::dot(D, dir) < 0 && R * R > P;
+    });
+
+    m_DirectionalLight->projView = DirectionalLightProjView(m_DirectionalLightVisableEntities, dir);
 }
 
 void RenderScene::filterPointLightVisable() {

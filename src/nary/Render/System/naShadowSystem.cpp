@@ -55,8 +55,10 @@ void naShadowSystem::createPipeline(VkRenderPass renderPass) {
 }
 
 void naShadowSystem::renderGameObjects(const RenderScene& scene, VkCommandBuffer commandBuffer) {
-    // if (!scene.m_DirectionalLight.has_value())
-    //     return;
+    DEBUG_LOG("now {} objects cast shadow", scene.m_DirectionalLightVisableEntities.size());
+
+     if (!scene.m_DirectionalLight.has_value() || scene.m_DirectionalLightVisableEntities.empty())
+         return;
 
     pipeline->bind(commandBuffer);
     
@@ -68,7 +70,7 @@ void naShadowSystem::renderGameObjects(const RenderScene& scene, VkCommandBuffer
                             &global_ubo,
                             0, nullptr);
     
-    for (auto& entity : scene.m_Entities) {
+    for (auto& entity : scene.m_DirectionalLightVisableEntities) {
         ShadowPushConstantData push{};
         push.modelMatrix = entity.modelMat;
         

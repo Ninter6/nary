@@ -1,22 +1,111 @@
 {
-    "texture": ["fair-smartface.jpg"],
-    "mesh": ["cube.obj"],
-    "material": [{
-        "base_color": [0.1, 0.8, 0.2, 0.5],
-        "base_color_tex": 0,
-        "metallic": 0.0,
-        "roughness": 0.0
-    }],
+    "texture": ["cirno_base_color.jpg", "floor.jpg", "basket ball.jpg"],
+    "mesh": ["cirno.obj", "quad.obj", "cube.obj", "sphere.obj"],
+    "material": [
+        {
+            "base_color": [0, 0, 0, 0],
+            "base_color_tex": 0,
+            "metallic": 0.4,
+            "roughness": 0.5
+        },
+        {
+            "base_color": [0, 0, 0, 0],
+            "base_color_tex": 1,
+            "metallic": 0.3,
+            "roughness": 0.8
+        },
+        {
+            "base_color": [0.1, 0.8, 0.2, 1],
+            "metallic": 0.8,
+            "roughness": 0.2
+        },
+        {
+            "base_color": [1, 0.3, 0.1, 1],
+            "metallic": 0.3,
+            "roughness": 0.7
+        },
+        {
+            "base_color": [0, 0, 0,0],
+            "metallic": 0.4,
+            "roughness": 0.8
+        }
+    ],
     "root": {
         "children": [
             {
                 "transform": {
-                    "translation": [-1, -0.2, 3],
-                    "scale": [0.3, 0.3, 0.3],
+                    "translation": [0, 0, 0],
+                    "scale": [5, 5, 5],
+                    "rotation": [0, 0, 0]
+                },
+                "mesh": 1,
+                "material": 1,
+                "children": []
+            },
+            {
+                "transform": {
+                    "translation": [2, 0, 2],
+                    "scale": [1, 1, 1],
                     "rotation": [0, 0, 0]
                 },
                 "mesh": 0,
                 "material": 0,
+                "children": []
+            },
+            {
+                "transform": {
+                    "translation": [2, 0, -2],
+                    "scale": [1, 1.5, 1],
+                    "rotation": [0, 30, 0]
+                },
+                "mesh": 2,
+                "material": 2,
+                "children": []
+            },
+            {
+                "transform": {
+                    "translation": [-2, 0, -2],
+                    "scale": [1, 1, 1],
+                    "rotation": [0, -30, 0]
+                },
+                "mesh": 2,
+                "material": 3,
+                "children": []
+            },
+            {
+                "transform": {
+                    "translation": [-2, 0, 2],
+                    "scale": [0.3, 0.3, 0.3],
+                    "rotation": [0, 0, 0]
+                },
+                "mesh": 3,
+                "material": 4,
+                "children": []
+            },
+            {
+                "transform": {
+                    "translation": [0, 0, 0],
+                    "scale": [1, 1, 1],
+                    "rotation": [0, 0, 0]
+                },
+                "directional_light": {
+                    "color": [1, 1, 1, 1],
+                    "direction": [-0.522, -0.42, -0.492]
+                },
+                "children": []
+            },
+            {
+                "transform": {
+                    "translation": [0, -2, -5],
+                    "scale": [1, 1, 1],
+                    "rotation": [0, 180, 0]
+                },
+                "camera": {
+                    "fov": 45,
+                    "near": 0.1,
+                    "far": 100,
+                    "aspect": 1.6
+                },
                 "children": []
             }
         ]

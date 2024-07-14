@@ -10,22 +10,33 @@
 #include "PhysicsWorld.hpp"
 #include "naGameObject.hpp"
 
+#include <memory>
+
 namespace nary {
+
+struct PhysicsObject {
+    std::shared_ptr<pxpls::Rigidbody> body;
+    std::shared_ptr<pxpls::Collider> collider;
+};
 
 class naPhysicsWorld {
 public:
-    naPhysicsWorld() = default;
+    naPhysicsWorld();
     
     void Update(float dt, naGameObject::Map& objs);
     
 private:
-    pxpls::PhysicsWorld m_PhyWorld;
+    pxpls::DynamicsWorld m_World;
+
+    pxpls::VerletSolver solver;
+    pxpls::CollisionBody floor;
+    pxpls::PlaneCollider collider{{0, -1, 0, 0}};
     
-    std::unordered_map<naGameObject::id_t, pxpls::PhysicalObj> m_PhyObjs;
+    std::unordered_map<naGameObject::id_t, PhysicsObject> m_Objs;
     
-    void pickGameObjs(const naGameObject::Map& objs);
-    pxpls::PhysicalObj& GetPhyObject(naGameObject::id_t id);
-    
+    void pickGameObjs(float dt, const naGameObject::Map& objs);
+    PhysicsObject& GetObject(naGameObject::id_t id);
+
 };
 
 }

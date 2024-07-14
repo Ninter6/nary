@@ -6,71 +6,54 @@
 //
 
 #include "naPhysicsWorld.hpp"
+#include "naEventListener.hpp"
 
 namespace nary {
 
-//pxpls::PhysicalObj& naPhysicsWorld::GetPhyObject(naGameObject::id_t id) {
-//    auto it = m_PhyObjs.find(id);
-//    if (it != m_PhyObjs.end())
-//        return it->second;
-//
-//    auto& obj = m_PhyObjs[id];
-//
-//    m_PhyWorld.AddObject(&obj); // push obj to physics world
-//
-//    return obj;
-//}
+naPhysicsWorld::naPhysicsWorld() : m_World(std::make_unique<pxpls::UniformGrid>(pxpls::Bounds{-100, 100}, mathpls::uivec3{10})) {
+    m_World.Gravity = {0, -10, 0};
+    m_World.AddSolver(&solver);
 
-void naPhysicsWorld::pickGameObjs(const naGameObject::Map& objs) {
+    floor.collider = &collider;
+
+    m_World.AddCollisionBody(&floor);
+}
+
+void naPhysicsWorld::pickGameObjs(float dt, const naGameObject::Map& objs) {
     for (const auto& [id, obj] : objs) {
         auto rb = obj.getComponent<RigidBodyComponent>();
         if (!rb) continue;
-        if (!m_PhyObjs.contains(id)) {
-            pxpls::PhysicalObj phyobj;
+        if (!m_Objs.contains(id)) {
+            PhysicsObject phyobj;
+            phyobj.body = std::make_shared<pxpls::Rigidbody>();
+            phyobj.body->IsKinematic = true;
             
-            phyobj.transform.Position = {
-                obj.transform().translation.x,
-               -obj.transform().translation.y,
-                obj.transform().translation.z
-            };
-            phyobj.transform.Scale = {
-                obj.transform().scale.x,
-               -obj.transform().scale.y,
-                obj.transform().scale.z
-            };
+            phyobj.body->SetPosition(obj.transform().translation);
+            phyobj.body->transform.Scale = obj.transform().scale;
+
+            phyobj.body->lastPostion -= rb->velocity * dt;
+            phyobj.body->mass = rb->mass;
+
+            phyobj.collider = std::make_shared<pxpls::SphereCollider>(0, 1.f);
+            phyobj.body->collider = phyobj.collider.get();
             
-            auto& po_rb = phyobj.SetRigidbody();
-            po_rb.velocity = {rb->velocity.x, rb->velocity.y, rb->velocity.z};
-            po_rb.mass = rb->mass;
-            
-            auto [it, success] = m_PhyObjs.emplace(id, std::move(phyobj));
+            auto [it, success] = m_Objs.emplace(id, std::move(phyobj));
             
             assert(success && "failed to create physical objest!");
-            m_PhyWorld.AddObject(&it->second);
+            m_World.AddRigidbody(it->second.body.get());
         }
     }
 }
 
 void naPhysicsWorld::Update(float dt, naGameObject::Map& objs) {
-    pickGameObjs(objs);
+    pickGameObjs(std::clamp(dt, 1e-8f, .1f), objs);
     
-    m_PhyWorld.Update(dt);
+    m_World.Step(dt);
     
-    for (auto& [id, phyobj] : m_PhyObjs) {
-//        std::cout
-//            << phyobj.transform.Position.x << " "
-//            << phyobj.transform.Position.y << " "
-//            << phyobj.transform.Position.z << " "
-//            << std::endl;
+    for (auto& [id, phyobj] : m_Objs) {
         auto& go = objs.at(id);
         
-        go.transform().translation = {
-            phyobj.transform.Position.x,
-           -phyobj.transform.Position.y,
-            phyobj.transform.Position.z
-        };
-        
-        if (phyobj.transform.Position.y < .2f && phyobj.rigidbody().velocity.y < 0) phyobj.rigidbody().velocity.y *= -.707f;
+        go.transform().translation = phyobj.body->Position();
     }
 }
 
